@@ -88,11 +88,8 @@ benchmark_exact_pca <- function(scenario, centred, config) {
       H <- sweep(H, 1L, rowMeans(H), FUN = "-")
     }
     fit <- stats::prcomp(H, center = FALSE, scale. = FALSE, rank. = config$rhpca$rho)
-    # prcomp(H) scores scale by lambda; rhpca scores scale by sqrt(lambda).
-    lambda <- fit$sdev[seq_len(ncol(fit$x))] * sqrt(max(1L, nrow(H) - 1L))
-    divisor <- sqrt(lambda)
-    divisor[divisor == 0] <- 1
-    fit$x <- sweep(fit$x, 2L, divisor, FUN = "/")
+    # For PSD H, prcomp(H) already returns eigenvalue-scaled scores U * d,
+    # matching the randomised-PCA algorithm. Do not rescale by sqrt(d).
     fit
   })
   list(status = "ok", timing = exact_t, object = exact_t$value)

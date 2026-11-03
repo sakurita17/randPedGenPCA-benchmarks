@@ -190,10 +190,11 @@ centered case. The estimator's Rademacher distribution and original vector
 allocation are retained.
 
 `rhpca()` checks symmetry and positive semidefiniteness of the reduced matrix.
-The currently inspected source uses reduced SVD and scores `u * d`. Older
-benchmark diagnostics and documentation assumed `u * sqrt(d)`; verify the
-score convention before interpreting score-scaling errors or coordinate
-comparisons. This documentation update does not change either implementation.
+The currently inspected source uses reduced SVD and scores `u * d`, matching
+the algorithm's eigenvalue-scaled output. Benchmark score checks and exact
+references now use that same convention. Historical CSV diagnostics used
+`u * sqrt(d)` and must be recomputed before interpreting coordinate errors.
+The scientific PCA implementation itself has not been changed by this correction.
 If the trace is non-finite, numerically non-positive or below the retained
 spectral sum, `rhpca()` emits a warning and returns `varProps = NA`, without
 changing the estimate produced by `hutchH()`.

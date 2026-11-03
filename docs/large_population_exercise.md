@@ -119,9 +119,10 @@ scaling merely because the algorithm does not construct the full H matrix.
 
 **Numerical robustness:** inspect `symmetry_error` before symmetrizing B,
 `orth_fro_error` (the norm of U^T U - I), `score_scaling_max_error`, centered
-score means and `warnings`. The score-scaling diagnostic currently assumes
-`u * sqrt(d)`; check that convention against the scientific package version
-before interpreting this column. No numerical error does not guarantee that
+score means and `warnings`. The score-scaling diagnostic now checks `u * d`,
+matching the algorithm, and records `score_scaling="U*d"`. Historical CSVs
+without that marker used a `u * sqrt(d)` check; do not interpret their score
+scaling error as failure of the current algorithm. No numerical error does not guarantee that
 the sketch accurately captures the leading components.
 
 **Approximate accuracy without exact PCA:** diagnostics calculate

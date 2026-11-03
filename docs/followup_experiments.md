@@ -22,8 +22,13 @@ eigenvalues; inspect subspaces and the recorded reference eigengap. Approximate
 variance proportions include Hutch++ error (50 trace vectors). The reference
 orders eigenvalues algebraically and records the minimum eigenvalue to flag
 potential positive-semidefiniteness problems. Score alignment assumes the
-reference score scale; verify that it matches the package's score convention
-before interpreting aligned-score errors.
+reference score scale, now `U * diag(d)` as required by the algorithm.
+Historical reference files used `U * diag(sqrt(d))`. The corrected comparison
+worker reconstructs the reference scores from its saved eigenvectors and
+eigenvalues, allowing legacy reference RDS files to be reused without rerunning
+the eigendecomposition or PCA. Old CSV coordinate-error metrics require this
+recomputation; the summary marks them as not aligned rather than reporting them
+as valid errors.
 
 **`genotyped`:** a single pedigree of 20,000 individuals with 1,000 markers.
 Genotypes for all 4,000 animals in the last two generations are simulated once.

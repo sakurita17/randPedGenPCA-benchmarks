@@ -7,7 +7,6 @@ load_benchmark_packages(bench_config)
 config <- bench_config
 config$rhpca$rho <- 3L
 config$rhpca$q <- 2L
-config$rhpca$l <- 100L
 config$rhpca$numVectorsTrace <- 5L
 config$rhpca$epsilon <- 0.1
 config$geno_generations <- "last"
@@ -15,6 +14,7 @@ params <- list(design = "smoke", geno_sampling = "fraction_last_generation",
                popSize = 6L, geno_pct = 100, nChr = 1L, segSites = 40L,
                split = 20L, nGenPhase1 = 1L, nGenPhase2 = 1L)
 sim <- simulate_benchmark_population(params, config)
+config$rhpca$l <- length(sim$ped@label) # Full sketch satisfying l <= n.
 for (centredH in c(FALSE, TRUE)) {
   config$rhpca$centredH <- centredH
   for (name in config$scenarios) {

@@ -40,7 +40,8 @@ if (mode == "subset") {
   reference <- list(K = K, d = exact$values[seq_len(rho)],
                     u = exact$vectors[, seq_len(rho), drop = FALSE],
                     trace = sum(diag(K)))
-  reference$x <- sweep(reference$u, 2L, sqrt(pmax(reference$d, 0)), `*`)
+  reference$x <- sweep(reference$u, 2L, reference$d, `*`)
+  reference$score_scaling <- "U*d"
   saveRDS(reference, fit_file, compress = FALSE)
   write.csv(data.frame(
     n = data$n, n_genotyped = nrow(data$M), markers = ncol(data$M),
@@ -55,6 +56,9 @@ if (mode == "subset") {
   fit <- readRDS(args[2])
   reference <- readRDS(args[3])
   target <- args[4]
+  # Reconstruct from eigenvectors/eigenvalues so that legacy reference RDS
+  # files can be compared correctly without rerunning PCA or eigendecomposition.
+  reference$x <- sweep(reference$u, 2L, reference$d, `*`)
   rho <- length(fit$d)
   KU <- reference$K %*% fit$u
   residual <- KU - sweep(fit$u, 2L, fit$d, `*`)
@@ -79,7 +83,8 @@ if (mode == "subset") {
     pc2_abs_cor = abs(cor(fit$x[, 2], reference$x[, 2])),
     max_relative_eigenpair_residual = max(relative_residual),
     trace_relative_error = trace_error,
-    variance_proportion_max_abs_error = prop_error
+    variance_proportion_max_abs_error = prop_error,
+    reference_score_scaling = "U*d"
   ), target, row.names = FALSE)
   cat("Comparison with exact reference saved\n")
 } else if (mode == "session") {

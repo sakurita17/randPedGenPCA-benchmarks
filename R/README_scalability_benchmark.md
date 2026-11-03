@@ -37,12 +37,12 @@ These replace `k`, `numIter`, and `numVectors`; edit them in
 `bench_config$rhpca`. `numVectorsTrace` still controls trace estimation.
 
 The exact reference uses the same `epsilon` and, when `centredH = TRUE`,
-double-centers H before `prcomp`. This runner rescales exact scores from
-`u * d` to `u * sqrt(d)`, following the score convention it originally targeted.
-The currently inspected randPedGenPCA source instead returns scores `u * d`.
-Verify and reconcile that convention before interpreting coordinate RMSE or
-score-scaling checks; this documentation update does not change the runner or
-scientific implementation. For a positive-semidefinite H, `rhpca$d` contains
+double-centers H before `prcomp`. For a positive-semidefinite H, the unmodified
+`prcomp(H, center=FALSE, scale.=FALSE)` scores already use `u * d`, matching the
+algorithm's eigenvalue-scaled scores. No square-root rescaling is applied.
+Older versions of this runner incorrectly rescaled the exact scores to
+`u * sqrt(d)`; their coordinate RMSE must not be interpreted as an aligned
+comparison with the current algorithm. For a positive-semidefinite H, `rhpca$d` contains
 approximate eigenvalues. The `sdev` and variance proportions from `prcomp(H)`
 are not directly comparable to those returned by `rhpca`.
 The output column `pca_rank` remains unchanged for plotting compatibility.

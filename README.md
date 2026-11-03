@@ -55,6 +55,10 @@ the time/memory measurements mean.
 The [Hutch++ trace algorithm guide](docs/hutch_trace_algorithm.md) explains the
 estimator, its vector budget and its connection to PCA.
 
+The [algorithm alignment note](docs/algorithm_alignment.md) maps the specified
+randomised-PCA steps to the implementation and documents the benchmark-only
+correction to eigenvalue-scaled score comparisons.
+
 For the reference-version, correctness and before/after measurement workflow,
 read [the optimization protocol](docs/optimization_protocol.md). The initial
 [change log](reports/optimization/change_log.csv) records historical reference

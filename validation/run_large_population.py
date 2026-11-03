@@ -17,7 +17,7 @@ WORKER = ROOT / 'validation' / 'large_population.R'
 FIELDS = ['stage', 'status', 'n', 'n_genotyped', 'markers', 'rho', 'q', 'l',
           'centredH', 'seed', 'trace_vectors', 'simulation_sec', 'pca_elapsed_sec',
           'diagnostic_elapsed_sec', 'process_wall_sec', 'peak_process_rss_mib',
-          'symmetry_error', 'sketch_rank', 'orth_fro_error', 'score_scaling_max_error',
+          'symmetry_error', 'sketch_rank', 'orth_fro_error', 'score_scaling_max_error', 'score_scaling',
           'centred_scores_max_mean', 'trace_estimate', 'explained_sum',
           'max_relative_eigenpair_residual', 'eigenvalue_relative_change_vs_base',
           'normalised_subspace_change_vs_base', 'warnings', 'log', 'fit_file']

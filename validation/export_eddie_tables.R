@@ -93,6 +93,10 @@ if (english) notes <- c(
   "Failed stages and incomplete run coverage are listed separately.",
   "Coordinate .rds files were not downloaded; the report figures are not PC1 versus PC2 plots."
 )
+if (english) notes <- c(notes,
+  "The algorithm uses X=U*diag(d). Historical aligned-score errors used a sqrt(d) reference and are not valid coordinate errors; see score_comparison_status.",
+  "Historical raw score errors are retained for audit. Corrected coordinate diagnostics require the saved RDS files; PCA runtimes/eigenvalue comparisons are unaffected."
+)
 readme <- tr("LEEME", "README")
 addWorksheet(wb, readme)
 writeData(wb, readme, setNames(data.frame(notes), tr("nota", "note")))

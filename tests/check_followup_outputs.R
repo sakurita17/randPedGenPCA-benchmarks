@@ -25,6 +25,7 @@ data <- readRDS(file.path(exact_dir, "data_80.rds"))
 Li <- pedigreeTools::getLInv(data$ped)
 for (center in c(FALSE, TRUE)) {
   ref <- readRDS(file.path(exact_dir, paste0("n80_c", center, "_exact.rds")))
+  stopifnot(isTRUE(all.equal(ref$x, sweep(ref$u, 2L, ref$d, `*`), tolerance = 1e-12)))
   op <- pkg$makeHxOperator(pkg$inputHx(Li, data$M), center, "0.5", NULL,
                            0.01, TRUE, 1000L)
   set.seed(345)
@@ -35,10 +36,13 @@ for (center in c(FALSE, TRUE)) {
   fit <- pkg$rhpca.pedigree(data$ped, data$M, rho = 3, q = 0, l = 80,
                            centredH = center, centred = "0.5", epsilon = 0.01)
   stopifnot(max(abs(fit$d - ref$d) / abs(ref$d)) < 1e-8)
+  stopifnot(isTRUE(all.equal(fit$x, sweep(fit$u, 2L, fit$d, `*`), tolerance = 1e-12)))
 }
 for (folder in c(exact_dir, genotyped_dir)) {
   rows <- read.csv(file.path(folder, "results.csv"))
   stopifnot(all(rows$status == "ok"), all(rows$process_wall_sec >= 0),
             all(rows$peak_process_rss_mib > 0))
+  pca <- rows[rows$stage == "pca", ]
+  stopifnot(all(pca$score_scaling == "U*d"), all(pca$score_scaling_max_error < 1e-12))
 }
 cat("Passed: nested datasets, fixed pedigree/genotypes, exact/implicit operator, full-sketch eigenvalues\n")

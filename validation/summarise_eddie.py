@@ -117,6 +117,8 @@ def main():
                         cambio_eigenvalores_vs_base=metric(diag, "eigenvalue_relative_change_vs_base"),
                         cambio_subespacio_vs_base=metric(diag, "normalised_subspace_change_vs_base"),
                         error_ortogonalidad=metric(pca, "orth_fro_error"),
+                        score_check_status="aligned_U_d" if pca.get("score_scaling") == "U*d"
+                          else "historical_check_requires_review",
                         advertencias=pca.get("warnings", ""),
                         diagnostico_estado=diag.get("status", "ausente"),
                         archivo_resultados=str(path))
@@ -126,9 +128,16 @@ def main():
                 base["porcentaje_genotipado"] = 100 * base["genotipados"] / base["n"]
                 geno.append(base)
             elif experiment == "exact":
+                # Old reports compared U*d scores with an exact U*sqrt(d)
+                # reference. Keep their raw metric for audit, not as valid error.
+                score_reference_valid = diag.get("reference_score_scaling") == "U*d"
+                raw_score_error = metric(diag, "aligned_scores_relative_error")
                 base.update(error_eigenvalores_pct=metric(diag, "eigenvalue_max_rel_error", .01),
                             error_subespacio=metric(diag, "normalised_subspace_error"),
-                            error_scores_alineados=metric(diag, "aligned_scores_relative_error"),
+                            error_scores_alineados=raw_score_error if score_reference_valid else None,
+                            raw_historical_aligned_scores_error=raw_score_error,
+                            score_comparison_status="aligned_U_d" if score_reference_valid
+                              else "historical_reference_scale_not_aligned",
                             correlacion_pc1=metric(diag, "pc1_abs_cor"),
                             correlacion_pc2=metric(diag, "pc2_abs_cor"),
                             error_traza_pct=metric(diag, "trace_relative_error", .01),
@@ -164,7 +173,11 @@ def main():
                        rss_pca_max_mib=max(r["rss_proceso_mib"] for r in group),
                        error_eigenvalores_peor_pct=max(r["error_eigenvalores_pct"] for r in group),
                        error_subespacio_peor=max(r["error_subespacio"] for r in group),
-                       error_scores_alineados_peor=max(r["error_scores_alineados"] for r in group),
+                       error_scores_alineados_peor=max(r["error_scores_alineados"] for r in group)
+                         if all(r["error_scores_alineados"] is not None for r in group) else None,
+                       score_comparison_status="aligned_U_d" if all(
+                         r["error_scores_alineados"] is not None for r in group)
+                         else "historical_reference_scale_not_aligned",
                        residuo_peor=max(r["residuo_max_relativo"] for r in group),
                        correlacion_pc1_min=min(r["correlacion_pc1"] for r in group),
                        correlacion_pc2_min=min(r["correlacion_pc2"] for r in group),
@@ -252,6 +265,7 @@ def main():
                                 ("error_subespacio_peor", "Worst subspace error"),
                                 ("correlacion_pc2_min", "Minimum PC2 correlation")]), "",
                "Each configuration reports the median runtime and worst error across three PCA seeds applied to the same dataset. These are not three independent population simulations. Eigenvalue error is the maximum relative error among the five components, expressed as a percentage. Subspace error is dimensionless and is not expressed as a percentage. Correlations are absolute values, allowing arbitrary eigenvector signs; individual-PC correlations can be misleading when eigenvalues are nearly repeated.", "",
+               "Score convention correction: the algorithm returns X = U diag(d). The original validation compared these scores with an exact U diag(sqrt(d)) reference. Historical aligned-score errors are therefore marked as not aligned and excluded from the valid error summary; raw values remain available for audit. Historical score_scaling_max_error checks also used sqrt(d). The validator has been corrected for future runs. Eigenvalue errors, subspace errors, residuals, absolute PC correlations and measured PCA times are unaffected by this score-scale correction. Recomputing coordinate-error diagnostics requires the saved RDS files, not a rerun of the expensive PCA.", "",
                "The exact reference diagonalizes the same H or CHC operator, not the genotype matrix. Reference runtime in the workbook includes building H and its full eigendecomposition; rhpca computes five components and includes Hutch++ trace estimation. A runtime ratio should not be interpreted as a universal comparison of equivalent algorithmic workloads.", "",
                "## Fixed pedigree with more genotyped animals", "",
                markdown(geno, [("n", "Pedigree size"), ("genotipados", "Genotyped animals"), ("operador", "Operator"),
